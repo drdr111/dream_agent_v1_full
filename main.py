@@ -1,8 +1,8 @@
 import os
+import asyncio
 from fastapi import FastAPI, Request
 from telegram import Update
 from telegram.ext import (
-    Application, 
     ApplicationBuilder, 
     ContextTypes, 
     MessageHandler, 
@@ -42,6 +42,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ).status
         if status == "completed":
             break
+        await asyncio.sleep(1)
 
     messages = client.beta.threads.messages.list(thread_id=thread.id)
     last_response = messages.data[0].content[0].text.value
@@ -51,7 +52,6 @@ telegram_app.add_handler(
     MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message)
 )
 
-# FastAPI Webhook endpoint
 @app.post("/")
 async def webhook(req: Request):
     data = await req.json()
