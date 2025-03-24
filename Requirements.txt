@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+openai
+tqdm
+python-dotenv
+httpx
+pydantic
+requests
+colorama
