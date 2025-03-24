@@ -1,9 +1,2 @@
-fastapi
-uvicorn
-openai
-tqdm
-python-dotenv
-httpx
-pydantic
-requests
-colorama
+
+python-telegram-bot==20.5
