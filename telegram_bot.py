@@ -2,12 +2,11 @@ import os
 import logging
 from dotenv import load_dotenv
 from telegram import Update
-from telegram.ext import ApplicationBuilder, ContextTypes, MessageHandler, filters
+from telegram.ext import ApplicationBuilder, MessageHandler, ContextTypes, filters
 from openai import OpenAI
 
 # Загрузка переменных окружения
 load_dotenv("config/.env")
-
 openai_api_key = os.getenv("OPENAI_API_KEY")
 assistant_id = os.getenv("OPENAI_ASSISTANT_ID")
 telegram_token = os.getenv("TELEGRAM_BOT_TOKEN")
@@ -43,7 +42,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text(last_response)
 
-# Основной запуск
+# Основной запуск для Railway
 if __name__ == "__main__":
     PORT = int(os.environ.get("PORT", 8443))
 
