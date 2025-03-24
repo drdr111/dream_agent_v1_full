@@ -44,10 +44,14 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(last_response)
 
 # Основной запуск
-def main():
+if __name__ == "__main__":
+    PORT = int(os.environ.get("PORT", 8443))
+
     app = ApplicationBuilder().token(telegram_token).build()
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-    app.run_polling()
 
-if __name__ == "__main__":
-    main()
+    app.run_webhook(
+        listen="0.0.0.0",
+        port=PORT,
+        webhook_url=f"https://{os.environ['RAILWAY_PUBLIC_DOMAIN']}/"
+    )
