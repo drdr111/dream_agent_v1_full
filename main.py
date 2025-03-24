@@ -1,4 +1,3 @@
-
 from fastapi import FastAPI, Request
 import openai
 from dotenv import load_dotenv

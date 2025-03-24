@@ -1,29 +1,51 @@
-from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
-import openai, os
+import os
+import logging
 from dotenv import load_dotenv
+from telegram import Update
+from telegram.ext import ApplicationBuilder, ContextTypes, MessageHandler, filters
+from openai import OpenAI
 
+# Загрузка переменных окружения
 load_dotenv("config/.env")
-openai.api_key = os.getenv("OPENAI_API_KEY")
+
+openai_api_key = os.getenv("OPENAI_API_KEY")
 assistant_id = os.getenv("OPENAI_ASSISTANT_ID")
+telegram_token = os.getenv("TELEGRAM_BOT_TOKEN")
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Привет! Я Dream Agent. Задай вопрос — и кто-то из команды ответит.")
+# Настройка логов
+logging.basicConfig(level=logging.INFO)
 
+# Настройка OpenAI
+client = OpenAI(api_key=openai_api_key)
+
+# Обработка сообщений
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    msg = update.message.text
-    thread = openai.beta.threads.create()
-    openai.beta.threads.messages.create(thread_id=thread.id, role="user", content=msg)
-    run = openai.beta.threads.runs.create(thread_id=thread.id, assistant_id=assistant_id)
-    while run.status not in ["completed", "failed"]:
-        run = openai.beta.threads.runs.retrieve(thread_id=thread.id, run_id=run.id)
-    messages = openai.beta.threads.messages.list(thread_id=thread.id)
-    reply = messages.data[0].content[0].text.value
-    await update.message.reply_text(reply)
+    user_message = update.message.text
 
+    thread = client.beta.threads.create()
+    client.beta.threads.messages.create(
+        thread_id=thread.id,
+        role="user",
+        content=user_message
+    )
+    run = client.beta.threads.runs.create(
+        thread_id=thread.id,
+        assistant_id=assistant_id
+    )
+
+    while True:
+        status = client.beta.threads.runs.retrieve(thread_id=thread.id, run_id=run.id)
+        if status.status == "completed":
+            break
+
+    messages = client.beta.threads.messages.list(thread_id=thread.id)
+    last_response = messages.data[0].content[0].text.value
+
+    await update.message.reply_text(last_response)
+
+# Основной запуск
 def main():
-    app = ApplicationBuilder().token(os.getenv("TELEGRAM_BOT_TOKEN")).build()
-    app.add_handler(CommandHandler("start", start))
+    app = ApplicationBuilder().token(telegram_token).build()
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     app.run_polling()
 
