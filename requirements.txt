@@ -7,7 +7,6 @@ httpx
 pydantic
 requests
 colorama
-python-telegram-bot[webhooks]
+python-telegram-bot[webhooks]==20.5
 openai
 python-dotenv
-python-telegram-bot[webhooks]==20.5
