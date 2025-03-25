@@ -66,4 +66,3 @@ async def on_startup():
 async def on_shutdown():
     await telegram_app.stop()
     await telegram_app.shutdown()
-
